@@ -1,0 +1,54 @@
+# Example numpad2midi configuration
+# Shows advanced configuration options
+
+device:
+  # Specify exact device path for more control
+  path: "/dev/input/by-id/usb-Example_Numpad-event-kbd"
+
+midi:
+  port_name: "MODEP Controller"
+  virtual_port: true
+
+mappings:
+  # Custom program changes
+  - key: "KEY_KP0"
+    action:
+      type: "program_change"
+      channel: 0
+      program: 10
+
+  # Control changes for effects
+  - key: "KEY_KP1"
+    action:
+      type: "control_change"
+      channel: 0
+      controller: 20
+      value: 64
+
+  # Note triggers
+  - key: "KEY_KP2"
+    action:
+      type: "note_on"
+      channel: 9  # Drum channel
+      note: 36    # Bass drum
+      velocity: 100
+
+  - key: "KEY_KP3"
+    action:
+      type: "note_on"
+      channel: 9
+      note: 38    # Snare
+      velocity: 100
+
+  # Multiple channels example
+  - key: "KEY_KP4"
+    action:
+      type: "program_change"
+      channel: 1
+      program: 0
+
+  - key: "KEY_KP5"
+    action:
+      type: "program_change"
+      channel: 2
+      program: 0

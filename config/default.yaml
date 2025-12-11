@@ -1,0 +1,132 @@
+# Default numpad2midi configuration
+# This file provides a basic setup for controlling MODEP with a numpad
+
+device:
+  # Auto-detect device by name pattern
+  name: "numpad"
+  # Or specify explicit path (uncomment to use):
+  # path: /dev/input/event0
+
+midi:
+  # Name of the MIDI port
+  port_name: "numpad2midi"
+  # Create a virtual MIDI port (true) or connect to existing port (false)
+  virtual_port: true
+
+mappings:
+  # Numpad 0-9: Program changes 0-9
+  - key: "KEY_KP0"
+    action:
+      type: "program_change"
+      channel: 0
+      program: 0
+
+  - key: "KEY_KP1"
+    action:
+      type: "program_change"
+      channel: 0
+      program: 1
+
+  - key: "KEY_KP2"
+    action:
+      type: "program_change"
+      channel: 0
+      program: 2
+
+  - key: "KEY_KP3"
+    action:
+      type: "program_change"
+      channel: 0
+      program: 3
+
+  - key: "KEY_KP4"
+    action:
+      type: "program_change"
+      channel: 0
+      program: 4
+
+  - key: "KEY_KP5"
+    action:
+      type: "program_change"
+      channel: 0
+      program: 5
+
+  - key: "KEY_KP6"
+    action:
+      type: "program_change"
+      channel: 0
+      program: 6
+
+  - key: "KEY_KP7"
+    action:
+      type: "program_change"
+      channel: 0
+      program: 7
+
+  - key: "KEY_KP8"
+    action:
+      type: "program_change"
+      channel: 0
+      program: 8
+
+  - key: "KEY_KP9"
+    action:
+      type: "program_change"
+      channel: 0
+      program: 9
+
+  # NumLock: Toggle effect bypass (CC 64)
+  - key: "KEY_NUMLOCK"
+    action:
+      type: "control_change"
+      channel: 0
+      controller: 64
+      value: 127
+
+  # Divide (/): Previous preset
+  - key: "KEY_KPSLASH"
+    action:
+      type: "control_change"
+      channel: 0
+      controller: 1
+      value: 0
+
+  # Multiply (*): Next preset
+  - key: "KEY_KPASTERISK"
+    action:
+      type: "control_change"
+      channel: 0
+      controller: 1
+      value: 127
+
+  # Minus (-): Decrease volume
+  - key: "KEY_KPMINUS"
+    action:
+      type: "control_change"
+      channel: 0
+      controller: 7
+      value: 100
+
+  # Plus (+): Increase volume
+  - key: "KEY_KPPLUS"
+    action:
+      type: "control_change"
+      channel: 0
+      controller: 7
+      value: 127
+
+  # Enter: Save current state
+  - key: "KEY_KPENTER"
+    action:
+      type: "control_change"
+      channel: 0
+      controller: 64
+      value: 0
+
+  # Period (.): Tap tempo
+  - key: "KEY_KPDOT"
+    action:
+      type: "note_on"
+      channel: 0
+      note: 60
+      velocity: 100
