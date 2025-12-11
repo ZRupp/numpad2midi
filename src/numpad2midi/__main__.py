@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 from numpad2midi.config import ConfigError, load_config
-from numpad2midi.discover import list_input_devices, test_device, find_device_interactive
+from numpad2midi.discover import list_input_devices, verify_device, find_device_interactive
 from numpad2midi.service import Service, ServiceError
 
 logger = logging.getLogger(__name__)
@@ -255,7 +255,7 @@ def cmd_test_device(args: argparse.Namespace) -> int:
             return 1
 
     try:
-        test_device(device_path, timeout=args.timeout)
+        verify_device(device_path, timeout=args.timeout)
         return 0
     except Exception as e:
         print(f"Error testing device: {e}")

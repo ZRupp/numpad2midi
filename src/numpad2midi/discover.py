@@ -1,6 +1,7 @@
 """Device discovery utility for finding input devices."""
 
 import logging
+import select
 from typing import Optional
 
 import evdev
@@ -97,9 +98,9 @@ def find_device_interactive() -> Optional[str]:
             return None
 
 
-def test_device(device_path: str, timeout: int = 5) -> None:
+def verify_device(device_path: str, timeout: int = 5) -> None:
     """
-    Test an input device by showing key presses.
+    Verify an input device by showing key presses.
 
     Args:
         device_path: Path to input device
@@ -111,8 +112,6 @@ def test_device(device_path: str, timeout: int = 5) -> None:
         print(f"Path: {device.path}")
         print(f"\nPress keys on your device (listening for {timeout} seconds)...")
         print("Press Ctrl+C to stop early.\n")
-
-        import select
 
         event_count = 0
         start_time = evdev.util.timestamp()
