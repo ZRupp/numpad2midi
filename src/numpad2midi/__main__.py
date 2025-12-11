@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 from numpad2midi.config import ConfigError, load_config
+from numpad2midi.discover import list_input_devices, test_device, find_device_interactive
 from numpad2midi.service import Service, ServiceError
 
 logger = logging.getLogger(__name__)
@@ -38,28 +39,37 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Numpad to MIDI service for MODEP control",
         formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    # Run command (default)
+    run_parser = subparsers.add_parser(
+        "run",
+        help="Run the numpad2midi service",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  numpad2midi config/default.yaml
-  numpad2midi --verbose --grab config/default.yaml
-  numpad2midi --no-grab ~/.config/numpad2midi.yaml
+  numpad2midi run config/default.yaml
+  numpad2midi run --verbose --grab config/default.yaml
+  numpad2midi run --no-grab ~/.config/numpad2midi.yaml
         """,
     )
 
-    parser.add_argument(
+    run_parser.add_argument(
         "config",
         type=Path,
         help="Path to configuration YAML file",
     )
 
-    parser.add_argument(
+    run_parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
         help="Enable verbose (DEBUG) logging",
     )
 
-    parser.add_argument(
+    run_parser.add_argument(
         "-g",
         "--grab",
         action="store_true",
@@ -67,23 +77,90 @@ Examples:
         help="Grab input device for exclusive access",
     )
 
-    parser.add_argument(
+    run_parser.add_argument(
         "--no-grab",
         action="store_true",
         help="Do not grab input device (allows sharing with other apps)",
     )
 
+    # List devices command
+    list_parser = subparsers.add_parser(
+        "list-devices",
+        help="List all available input devices",
+        aliases=["list", "ls"],
+    )
+
+    list_parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show detailed device information",
+    )
+
+    # Test device command
+    test_parser = subparsers.add_parser(
+        "test-device",
+        help="Test an input device by showing key presses",
+        aliases=["test"],
+    )
+
+    test_parser.add_argument(
+        "device",
+        nargs="?",
+        help="Device path to test (e.g., /dev/input/event0)",
+    )
+
+    test_parser.add_argument(
+        "-t",
+        "--timeout",
+        type=int,
+        default=5,
+        help="How long to listen for events (seconds, default: 5)",
+    )
+
+    # For backwards compatibility, allow running without subcommand
+    # If first arg is a file path, treat as "run" command
+    parser.add_argument(
+        "config_compat",
+        type=Path,
+        nargs="?",
+        help=argparse.SUPPRESS,
+    )
+
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help=argparse.SUPPRESS,
+    )
+
+    parser.add_argument(
+        "-g",
+        "--grab",
+        action="store_true",
+        default=False,
+        help=argparse.SUPPRESS,
+    )
+
+    parser.add_argument(
+        "--no-grab",
+        action="store_true",
+        help=argparse.SUPPRESS,
+    )
+
     return parser.parse_args()
 
 
-def main() -> int:
+def cmd_run(args: argparse.Namespace) -> int:
     """
-    Main entry point.
+    Run the service.
+
+    Args:
+        args: Parsed arguments
 
     Returns:
-        Exit code (0 for success, non-zero for error)
+        Exit code
     """
-    args = parse_args()
     setup_logging(args.verbose)
 
     # Determine grab setting
@@ -139,6 +216,87 @@ def main() -> int:
             service.stop()
 
     return 0
+
+
+def cmd_list_devices(args: argparse.Namespace) -> int:
+    """
+    List available input devices.
+
+    Args:
+        args: Parsed arguments
+
+    Returns:
+        Exit code
+    """
+    try:
+        list_input_devices(verbose=args.verbose)
+        return 0
+    except Exception as e:
+        print(f"Error listing devices: {e}")
+        return 1
+
+
+def cmd_test_device(args: argparse.Namespace) -> int:
+    """
+    Test an input device.
+
+    Args:
+        args: Parsed arguments
+
+    Returns:
+        Exit code
+    """
+    device_path = args.device
+
+    # If no device specified, show interactive selector
+    if not device_path:
+        device_path = find_device_interactive()
+        if not device_path:
+            return 1
+
+    try:
+        test_device(device_path, timeout=args.timeout)
+        return 0
+    except Exception as e:
+        print(f"Error testing device: {e}")
+        return 1
+
+
+def main() -> int:
+    """
+    Main entry point.
+
+    Returns:
+        Exit code (0 for success, non-zero for error)
+    """
+    args = parse_args()
+
+    # Handle backwards compatibility (no subcommand)
+    if args.command is None:
+        if args.config_compat:
+            # Old style: numpad2midi config.yaml
+            args.command = "run"
+            args.config = args.config_compat
+        else:
+            # No arguments, show help
+            print("Error: Missing command or configuration file\n")
+            print("Usage:")
+            print("  numpad2midi run <config.yaml>       Run the service")
+            print("  numpad2midi list-devices            List available devices")
+            print("  numpad2midi test-device [path]      Test a device")
+            print("\nFor more help: numpad2midi --help")
+            return 1
+
+    # Dispatch to command handlers
+    if args.command == "run":
+        return cmd_run(args)
+    elif args.command in ("list-devices", "list", "ls"):
+        return cmd_list_devices(args)
+    elif args.command in ("test-device", "test"):
+        return cmd_test_device(args)
+    else:
+        print(f"Unknown command: {args.command}")
+        return 1
 
 
 if __name__ == "__main__":

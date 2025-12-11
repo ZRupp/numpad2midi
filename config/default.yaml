@@ -1,11 +1,22 @@
 # Default numpad2midi configuration
 # This file provides a basic setup for controlling MODEP with a numpad
 
+# IMPORTANT: Many USB numpads don't have "numpad" in their device name!
+# Before using this config, find your device name:
+#   numpad2midi list-devices
+# Then update the "name" field below to match your device.
+
 device:
-  # Auto-detect device by name pattern
+  # Auto-detect device by name pattern (case-insensitive, partial match)
+  # Common patterns: "numpad", "USB", "keyboard", or your device brand
   name: "numpad"
-  # Or specify explicit path (uncomment to use):
-  # path: /dev/input/event0
+
+  # Or specify explicit path for stability across reboots (recommended):
+  # path: /dev/input/by-id/usb-Your_Device_Name-event-kbd
+
+  # To find your device:
+  # 1. Run: numpad2midi list-devices
+  # 2. Or run: ls -l /dev/input/by-id/
 
 midi:
   # Name of the MIDI port

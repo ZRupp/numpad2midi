@@ -30,9 +30,24 @@ cd numpad2midi
 sudo ./install.sh
 ```
 
+### Find Your Device
+
+**Important**: Most USB numpads don't have "numpad" in their device name! Before configuring, find your device:
+
+```bash
+# List all input devices
+numpad2midi list-devices
+
+# Test your device (interactive selection)
+numpad2midi test-device
+
+# Test specific device
+numpad2midi test-device /dev/input/event0
+```
+
 ### Configuration
 
-Edit `/etc/numpad2midi/config.yaml` to customize key mappings:
+Edit `/etc/numpad2midi/config.yaml` with your device name:
 
 ```yaml
 device:
@@ -67,14 +82,23 @@ sudo journalctl -u numpad2midi@$USER.service -f
 ### Manual Usage
 
 ```bash
+# List available input devices
+numpad2midi list-devices
+
+# Test a device interactively
+numpad2midi test-device
+
 # Run with default config
-numpad2midi config/default.yaml
+numpad2midi run config/default.yaml
 
 # Run with verbose logging
-numpad2midi --verbose config/default.yaml
+numpad2midi run --verbose config/default.yaml
 
 # Run with device grab (exclusive access)
-numpad2midi --grab config/default.yaml
+numpad2midi run --grab config/default.yaml
+
+# Backwards compatible (no "run" needed)
+numpad2midi config/default.yaml
 ```
 
 ## Configuration
@@ -134,7 +158,14 @@ midi:
 
 ### Finding Key Names
 
-To find the key codes for your device:
+The easiest way to find key names:
+
+```bash
+# Test your device and see key names as you press them
+numpad2midi test-device
+```
+
+Alternative using evtest:
 
 ```bash
 # Install evtest
@@ -203,11 +234,31 @@ Common issues:
 
 ### Device not detected
 
+**This is the most common issue!** Many numpads don't have "numpad" in their name.
+
 ```bash
-# List all input devices
+# List all input devices with their names
+numpad2midi list-devices
+
+# Find your device - look for USB devices or your numpad brand
+# Common names: "USB Keyboard", "Numeric Keypad", "1.3", etc.
+
+# Test to confirm it's the right device
+numpad2midi test-device
+
+# Update your config with the correct name pattern
+# Example: if device is "USB Keyboard", use:
+device:
+  name: "USB"  # Partial match works!
+```
+
+Alternative methods:
+
+```bash
+# List all input devices by ID (more stable)
 ls -l /dev/input/by-id/
 
-# Test device access
+# Test device access directly
 sudo evtest /dev/input/eventX
 ```
 
