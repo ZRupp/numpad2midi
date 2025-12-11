@@ -1,0 +1,25 @@
+[Unit]
+Description=Numpad to MIDI service for MODEP control
+Documentation=https://github.com/ZRupp/numpad2midi
+After=sound.target
+Wants=sound.target
+
+[Service]
+Type=simple
+User=%i
+Group=input
+ExecStart=/usr/local/bin/numpad2midi --grab /etc/numpad2midi/config.yaml
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/dev/snd
+
+[Install]
+WantedBy=multi-user.target
