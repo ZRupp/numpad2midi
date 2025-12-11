@@ -1,7 +1,7 @@
 # numpad2midi
 
-[![Tests](https://img.shields.io/badge/tests-72%20passing-brightgreen)](tests/)
-[![Coverage](https://img.shields.io/badge/coverage-83%25-brightgreen)](htmlcov/)
+[![Tests](https://img.shields.io/badge/tests-87%20passing-brightgreen)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-80%25-brightgreen)](htmlcov/)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
@@ -9,11 +9,12 @@ A background service for Linux that converts numpad key presses into MIDI messag
 
 ## Features
 
-- **Flexible Input**: Auto-detect numpad devices by name or use explicit device paths
+- **Device Discovery**: Built-in tools to find and test your numpad device
+- **Flexible Input**: Auto-detect devices by name or use explicit device paths
 - **Multiple MIDI Actions**: Support for Program Change, Control Change, Note On/Off
 - **Virtual MIDI Ports**: Create virtual MIDI ports or connect to physical ones
 - **Systemd Integration**: Run as a background service with auto-restart
-- **Test-Driven**: 72 tests with 83% code coverage
+- **Test-Driven**: 87 tests with 80% code coverage
 - **Well-Documented**: Clear configuration with examples for MODEP
 - **Type-Safe**: Full type hints and validation using Pydantic
 
@@ -105,17 +106,26 @@ numpad2midi config/default.yaml
 
 ### Device Configuration
 
+**First, find your device:**
+```bash
+numpad2midi list-devices
+```
+
+Then configure using one of these methods:
+
 ```yaml
 device:
-  # Option 1: Auto-detect by name pattern (case-insensitive)
-  name: "numpad"
+  # Option 1: Auto-detect by name pattern (case-insensitive, partial match)
+  name: "USB"  # Matches "USB Keyboard", "USB Numpad", etc.
 
   # Option 2: Explicit device path
   path: "/dev/input/event0"
 
-  # Option 3: Use device ID (more stable across reboots)
+  # Option 3: Use device ID (most stable across reboots, recommended)
   path: "/dev/input/by-id/usb-Your_Numpad-event-kbd"
 ```
+
+**Note**: Many USB numpads have generic names like "USB Keyboard" or brand names, not "numpad".
 
 ### MIDI Configuration
 
@@ -228,7 +238,7 @@ sudo journalctl -u numpad2midi@$USER.service -n 50
 ```
 
 Common issues:
-- **Device not found**: Run `ls -l /dev/input/by-id/` to find your numpad device
+- **Device not found**: Run `numpad2midi list-devices` to find your device
 - **Permission denied**: Ensure user is in `input` group: `groups $USER`
 - **MIDI port error**: Check if ALSA/JACK is running
 
@@ -252,14 +262,15 @@ device:
   name: "USB"  # Partial match works!
 ```
 
-Alternative methods:
+Using device IDs (more stable):
 
 ```bash
-# List all input devices by ID (more stable)
+# List devices by stable ID paths
 ls -l /dev/input/by-id/
 
-# Test device access directly
-sudo evtest /dev/input/eventX
+# Then use the full path in your config
+device:
+  path: "/dev/input/by-id/usb-Your_Device_Name-event-kbd"
 ```
 
 ### MIDI not working
@@ -309,14 +320,24 @@ git clone https://github.com/ZRupp/numpad2midi.git
 cd numpad2midi
 sudo ./install.sh
 
-# Configure for your numpad
+# Find your numpad device
+numpad2midi list-devices
+
+# Configure with your device name
 sudo nano /etc/numpad2midi/config.yaml
+# Update the "name" field with your device
+
+# Test configuration (optional)
+numpad2midi test-device
 
 # Enable service
 sudo systemctl enable numpad2midi@pi.service
 sudo systemctl start numpad2midi@pi.service
 
-# Reboot (to apply group membership)
+# Check it's working
+sudo systemctl status numpad2midi@pi.service
+
+# Reboot (to apply group membership if needed)
 sudo reboot
 ```
 
