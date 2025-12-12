@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-A background service for Linux that converts numpad key presses into MIDI messages, designed for controlling [MODEP](https://blokas.io/modep/) (MOD Emulator for Raspberry Pi) with a simple USB numpad.
+A background service for Linux that converts numpad key presses into MIDI messages, designed for controlling [MODEP](https://blokas.io/modep/) (MOD Emulator for Raspberry Pi) with a simple USB numpad. I created this because I wanted an easy way to control effects on [Patchbox OS](https://blokas.io/patchbox-os/) which I have set up on a [Raspberry Pi 4b (4gb)](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/?variant=raspberry-pi-4-model-b-4gb) attached to a [Waveshare 5.5 inch AMOLED Touchscreen Display](https://www.waveshare.com/5.5inch-hdmi-amoled.htm) which boots directly into MODEP so I can see which pedals/pedalboard I'm using without needing to lug my laptop around. The same setup could be run headless with a laptop.
 
 ## Features
 
@@ -52,7 +52,7 @@ Edit `/etc/numpad2midi/config.yaml` with your device name:
 
 ```yaml
 device:
-  name: "numpad"  # Auto-detect device with "numpad" in name
+  name: "numpad"  # Replace with the device's name
 
 midi:
   port_name: "numpad2midi"
@@ -116,7 +116,7 @@ Then configure using one of these methods:
 ```yaml
 device:
   # Option 1: Auto-detect by name pattern (case-insensitive, partial match)
-  name: "USB"  # Matches "USB Keyboard", "USB Numpad", etc.
+  name: "USB"  # Matches "USB Keyboard", "USB Numpad", etc. (probably the most unreliable method)
 
   # Option 2: Explicit device path
   path: "/dev/input/event0"
@@ -244,7 +244,7 @@ Common issues:
 
 ### Device not detected
 
-**This is the most common issue!** Many numpads don't have "numpad" in their name.
+**This is the most common issue!** Many numpads don't have "numpad" in their name, which will cause the auto-detection to fail.
 
 ```bash
 # List all input devices with their names
